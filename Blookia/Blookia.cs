@@ -6,19 +6,45 @@ namespace Blookia
 {
     public class Blookia
     {
-        public List<Block> Chain { get; protected set; } = new List<Block>();
+        /// <summary>
+        /// Stores the blockchain history for easy access.
+        /// </summary>
+        protected List<Block> Chain { get; set; }
 
-        protected Dictionary<int, double> Balance { get; set; } = new Dictionary<int, double>();
+        /// <summary>
+        /// Caches the current balance for each account number.
+        /// </summary>
+        protected Dictionary<int, double> Balance { get; set; }
 
-        public Blookia()
+        protected Blookia()
         {
-            var seed = new Transaction { Tx = -1, Rx = 0, Amount = 100 };
-            var genesis = new Block(null, seed);
-
-            Chain.Add(genesis);
-            SyncBalance();
+            Chain = new List<Block>();
+            Balance = new Dictionary<int, double>();
         }
 
+        /// <summary>
+        /// Creates a new Blookia blockchain with the specified genesis funds.
+        /// </summary>
+        /// <param name="amount">Seed funds to deposit to account 0</param>
+        /// <returns>Initialized Blookia instance</returns>
+        public static Blookia Create(double amount = 0)
+        {
+            var seed = new Transaction { Tx = -1, Rx = 0, Amount = amount };
+            var genesis = new Block(null, seed);
+
+            var blookia = new Blookia();
+            blookia.Chain.Add(genesis);
+            blookia.SyncBalance();
+
+            return blookia;
+        }
+
+        /// <summary>
+        /// Transfer funds from account tx to account rx.
+        /// </summary>
+        /// <param name="tx">Account number from which to withdraw</param>
+        /// <param name="rx">Account number to which to deposit</param>
+        /// <param name="amount">Amount of funds to be transferred</param>
         public void Transfer(int tx, int rx, double amount)
         {
             var t = new Transaction { Tx = tx, Rx = rx, Amount = amount };
@@ -49,6 +75,9 @@ namespace Blookia
             Balance[transaction.Rx] += transaction.Amount;
         }
 
+        /// <summary>
+        /// Initializes the account balance table from the transaction history.
+        /// </summary>
         protected void SyncBalance()
         {
             Balance.Clear();
@@ -70,7 +99,7 @@ namespace Blookia
             }
             s += line + "\n";
 
-            s += "Block\tParent\t\tHash\n";
+            s += "Block\tParent\t\tHash\t\tTransaction\n";
             for (int i = 0; i < Chain.Count; ++i)
             {
                 s += $"{i}\t{Chain[i]}\n";

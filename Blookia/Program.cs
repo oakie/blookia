@@ -6,7 +6,7 @@ namespace Blookia
     {
         static void Main(string[] args)
         {
-            var blookia = new Blookia();
+            var blookia = Blookia.Create(100);
 
             blookia.Transfer(0, 1, 20);
             blookia.Transfer(0, 2, 20);
